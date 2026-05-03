@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{% block title %}PeakSelf{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--black:#0a0a0a;--white:#f5f2ee;--cream:#ede8e1;--gold:#c9a96e;--gold2:#e8c98a;--green:#2d5a3d;--text:#1a1a1a}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(12px);background:rgba(10,10,10,.7);border-bottom:1px solid rgba(201,169,110,.15)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--gold);text-decoration:none}
+.logo span{color:var(--white)}
+nav .nav-links{display:flex;gap:1.5rem;align-items:center}
+nav .nav-links a{color:rgba(245,242,238,.6);text-decoration:none;font-size:.9rem;transition:color .2s}
+nav .nav-links a:hover{color:var(--white)}
+.btn-nav{background:var(--gold)!important;color:var(--black)!important;padding:.5rem 1.4rem!important;border-radius:50px;font-weight:500!important}
+.flash{padding:.8rem 1.5rem;border-radius:10px;margin-bottom:1rem;font-size:.9rem}
+.flash.error{background:rgba(220,50,50,.15);border:1px solid rgba(220,50,50,.3);color:#ff8080}
+.flash.success{background:rgba(45,90,61,.2);border:1px solid rgba(45,90,61,.4);color:#7ddb9a}
+.flash.info{background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.3);color:var(--gold)}
+main{padding-top:5rem;min-height:100vh}
+</style>
+{% block extra_style %}{% endblock %}
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">Peak<span>Self</span></a>
+  <div class="nav-links">
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('analyze') }}">New Analysis</a>
+      <a href="{{ url_for('logout') }}" class="btn-nav">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}" class="btn-nav">Get Started →</a>
+    {% endif %}
+  </div>
+</nav>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="max-width:700px;margin:1rem auto;padding:0 1.5rem">
+        {% for cat,msg in messages %}
+          <div class="flash {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>
