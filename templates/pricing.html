@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Pricing — PeakSelf{% endblock %}
+{% block extra_style %}
+<style>
+.pricing-wrap{max-width:900px;margin:0 auto;padding:3rem 1.5rem}
+h1{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:700;margin-bottom:.4rem}
+.sub{color:rgba(245,242,238,.5);font-size:.95rem;margin-bottom:3rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem}
+.card{background:rgba(245,242,238,.04);border:1px solid rgba(245,242,238,.1);border-radius:24px;padding:2.5rem;position:relative;transition:all .3s}
+.card.featured{background:rgba(201,169,110,.07);border-color:rgba(201,169,110,.4)}
+.card:hover{transform:translateY(-4px)}
+.badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--black);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem 1rem;border-radius:50px}
+.name{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
+.amount{font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;line-height:1;margin:.8rem 0}
+.amount span{font-size:1rem;font-weight:400;color:rgba(245,242,238,.4)}
+.desc{font-size:.85rem;color:rgba(245,242,238,.45);margin-bottom:1.5rem;line-height:1.6}
+ul{list-style:none;margin-bottom:2rem}
+ul li{font-size:.85rem;color:rgba(245,242,238,.7);padding:.35rem 0;border-bottom:1px solid rgba(245,242,238,.06);display:flex;align-items:center;gap:.5rem}
+ul li::before{content:'✦';color:var(--gold);font-size:.6rem}
+.btn{display:block;text-align:center;padding:.8rem;border-radius:50px;font-weight:500;font-size:.9rem;text-decoration:none;transition:all .25s}
+.btn-gold{background:var(--gold);color:var(--black)}
+.btn-gold:hover{background:var(--gold2)}
+.btn-ghost{border:1px solid rgba(245,242,238,.2);color:var(--white)}
+.btn-ghost:hover{border-color:rgba(245,242,238,.5);background:rgba(245,242,238,.05)}
+.note{text-align:center;color:rgba(245,242,238,.3);font-size:.78rem;margin-top:2rem}
+</style>
+{% endblock %}
+{% block content %}
+<div class="pricing-wrap">
+  <h1>Simple, honest pricing</h1>
+  <p class="sub">No hidden fees. Cancel anytime. Your score is always private.</p>
+  <div class="grid">
+
+    <div class="card">
+      <div class="name">Single Analysis</div>
+      <div class="amount">€2.99<span></span></div>
+      <div class="desc">Try it once, no commitment.</div>
+      <ul>
+        <li>1 complete AI analysis</li>
+        <li>7-pillar report</li>
+        <li>Private score</li>
+        <li>Week 1 action plan</li>
+      </ul>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-ghost" href="{{ url_for('buy', plan='single') }}">Buy 1 Analysis</a>
+      {% else %}
+        <a class="btn btn-ghost" href="{{ url_for('register') }}">Get started</a>
+      {% endif %}
+    </div>
+
+    <div class="card featured">
+      <div class="badge">Most Popular</div>
+      <div class="name">Monthly</div>
+      <div class="amount">€7.99<span>/mo</span></div>
+      <div class="desc">One analysis per week, track real progress.</div>
+      <ul>
+        <li>4 analyses / month</li>
+        <li>Progress history</li>
+        <li>Weekly action plans</li>
+        <li>All 7 pillars</li>
+      </ul>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-gold" href="{{ url_for('buy', plan='monthly') }}">Subscribe Monthly</a>
+      {% else %}
+        <a class="btn btn-gold" href="{{ url_for('register') }}">Subscribe now</a>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="name">Quarterly</div>
+      <div class="amount">€19.99<span>/3mo</span></div>
+      <div class="desc">90-day transformation. Best value.</div>
+      <ul>
+        <li>12 analyses over 3 months</li>
+        <li>Full progress tracking</li>
+        <li>Save €4/month</li>
+        <li>All 7 pillars</li>
+      </ul>
+      {% if current_user.is_authenticated %}
+        <a class="btn btn-ghost" href="{{ url_for('buy', plan='quarterly') }}">Choose Quarterly</a>
+      {% else %}
+        <a class="btn btn-ghost" href="{{ url_for('register') }}">Get started</a>
+      {% endif %}
+    </div>
+
+  </div>
+  <div class="note">⚠️ Payments are simulated for now — Stripe integration coming soon. No real charge will occur.</div>
+</div>
+{% endblock %}
