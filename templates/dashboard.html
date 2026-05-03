@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PeakSelf{% endblock %}
+{% block extra_style %}
+<style>
+.dash{max-width:1000px;margin:0 auto;padding:3rem 1.5rem}
+.dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3rem;flex-wrap:wrap;gap:1rem}
+.dash-header h1{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700}
+.dash-header h1 span{color:var(--gold)}
+.dash-header p{color:rgba(245,242,238,.5);font-size:.9rem;margin-top:.3rem}
+.btn-gold{background:var(--gold);color:var(--black);padding:.7rem 1.8rem;border-radius:50px;font-weight:600;font-size:.9rem;text-decoration:none;transition:background .2s;display:inline-block}
+.btn-gold:hover{background:var(--gold2)}
+.status-bar{background:rgba(245,242,238,.04);border:1px solid rgba(245,242,238,.1);border-radius:16px;padding:1.5rem 2rem;display:flex;gap:2.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
+.status-item{text-align:center}
+.status-val{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold);display:block}
+.status-key{font-size:.75rem;color:rgba(245,242,238,.4);text-transform:uppercase;letter-spacing:.06em}
+.section-head{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;color:rgba(245,242,238,.8)}
+.analysis-list{display:grid;gap:1rem}
+.analysis-card{background:rgba(245,242,238,.04);border:1px solid rgba(245,242,238,.08);border-radius:16px;padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;transition:border-color .2s}
+.analysis-card:hover{border-color:rgba(201,169,110,.3)}
+.analysis-date{font-size:.82rem;color:rgba(245,242,238,.4)}
+.analysis-score{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;color:var(--gold)}
+.analysis-label{font-size:.8rem;color:rgba(245,242,238,.5);margin-top:.1rem}
+.btn-view{background:rgba(201,169,110,.15);border:1px solid rgba(201,169,110,.3);color:var(--gold);padding:.5rem 1.2rem;border-radius:50px;font-size:.85rem;text-decoration:none;transition:all .2s}
+.btn-view:hover{background:rgba(201,169,110,.25)}
+.empty{text-align:center;padding:4rem 2rem;color:rgba(245,242,238,.35)}
+.empty h3{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:600;margin-bottom:.6rem;color:rgba(245,242,238,.5)}
+.empty p{font-size:.9rem;line-height:1.6}
+.no-credits{background:rgba(201,169,110,.08);border:1px solid rgba(201,169,110,.2);border-radius:16px;padding:1.5rem 2rem;margin-bottom:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.no-credits p{color:rgba(245,242,238,.65);font-size:.9rem}
+</style>
+{% endblock %}
+{% block content %}
+<div class="dash">
+  <div class="dash-header">
+    <div>
+      <h1>Hey, <span>{{ current_user.username }}</span> 👋</h1>
+      <p>Track your progress and run your weekly analysis.</p>
+    </div>
+    {% if current_user.can_analyze %}
+      <a class="btn-gold" href="{{ url_for('analyze') }}">New Analysis →</a>
+    {% else %}
+      <a class="btn-gold" href="{{ url_for('pricing') }}">Get Credits →</a>
+    {% endif %}
+  </div>
+
+  <div class="status-bar">
+    <div class="status-item">
+      <span class="status-val">{{ analyses|length }}</span>
+      <span class="status-key">Total Analyses</span>
+    </div>
+    <div class="status-item">
+      <span class="status-val">{{ current_user.credits }}</span>
+      <span class="status-key">Single Credits</span>
+    </div>
+    <div class="status-item">
+      <span class="status-val">{{ current_user.analyses_left if current_user.is_subscribed else 0 }}</span>
+      <span class="status-key">Weekly Left</span>
+    </div>
+    <div class="status-item">
+      <span class="status-val">{{ current_user.plan.capitalize() }}</span>
+      <span class="status-key">Plan</span>
+    </div>
+    {% if analyses %}
+    <div class="status-item">
+      <span class="status-val">{{ analyses[0].score }}</span>
+      <span class="status-key">Latest Score</span>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if not current_user.can_analyze %}
+  <div class="no-credits">
+    <p>You have no analyses available. Purchase a single analysis or subscribe to unlock weekly plans.</p>
+    <a class="btn-view" href="{{ url_for('pricing') }}">See Plans →</a>
+  </div>
+  {% endif %}
+
+  <div class="section-head">Your Analysis History</div>
+
+  {% if analyses %}
+  <div class="analysis-list">
+    {% for a in analyses %}
+    <div class="analysis-card">
+      <div>
+        <div class="analysis-date">{{ a.created_at.strftime('%B %d, %Y · %H:%M') }}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:.95rem;margin-top:.3rem">{{ a.report.get('score_label','Analysis') }}</div>
+      </div>
+      <div style="text-align:center">
+        <div class="analysis-score">{{ a.score }}</div>
+        <div class="analysis-label">/ 100</div>
+      </div>
+      <a class="btn-view" href="{{ url_for('report', aid=a.id) }}">View Report →</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <h3>No analyses yet</h3>
+    <p>Run your first analysis to get your personalized PeakSelf report and action plan.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
