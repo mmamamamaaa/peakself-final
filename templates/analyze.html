@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}New Analysis — PeakSelf{% endblock %}
+{% block extra_style %}
+<style>
+.analyze-wrap{max-width:680px;margin:0 auto;padding:3rem 1.5rem}
+h1{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;margin-bottom:.4rem}
+.sub{color:rgba(245,242,238,.5);font-size:.9rem;margin-bottom:2.5rem}
+.form-card{background:rgba(245,242,238,.04);border:1px solid rgba(245,242,238,.1);border-radius:20px;padding:2rem;margin-bottom:1.5rem}
+.form-card h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:600;color:var(--gold);margin-bottom:1.5rem;text-transform:uppercase;letter-spacing:.06em;font-size:.82rem}
+.field{margin-bottom:1.4rem}
+label{display:block;font-size:.82rem;color:rgba(245,242,238,.6);margin-bottom:.5rem}
+select,input[type=range],input[type=file],input[type=number]{width:100%;background:rgba(245,242,238,.06);border:1px solid rgba(245,242,238,.12);border-radius:10px;padding:.75rem 1rem;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;appearance:none;-webkit-appearance:none;transition:border-color .2s}
+select:focus{border-color:rgba(201,169,110,.5)}
+input[type=range]{padding:.4rem 0;background:transparent;border:none}
+.range-row{display:flex;align-items:center;gap:1rem}
+.range-val{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);min-width:2rem;text-align:center}
+.photo-zone{border:2px dashed rgba(245,242,238,.15);border-radius:16px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .3s;position:relative}
+.photo-zone:hover{border-color:rgba(201,169,110,.4)}
+.photo-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-icon{font-size:2.5rem;margin-bottom:.5rem}
+.photo-zone p{color:rgba(245,242,238,.4);font-size:.85rem}
+.photo-zone .name{color:var(--gold);font-size:.85rem;margin-top:.5rem}
+.optional-tag{font-size:.7rem;background:rgba(245,242,238,.08);border-radius:50px;padding:.15rem .6rem;margin-left:.5rem;vertical-align:middle}
+.btn-submit{width:100%;background:var(--gold);color:var(--black);border:none;border-radius:50px;padding:1rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s;margin-top:1rem}
+.btn-submit:hover{background:var(--gold2)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* loading overlay */
+.overlay{position:fixed;inset:0;background:rgba(10,10,10,.95);display:none;place-items:center;z-index:999;flex-direction:column;gap:1.5rem}
+.overlay.active{display:grid}
+.spinner{width:48px;height:48px;border:3px solid rgba(201,169,110,.2);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.overlay p{color:rgba(245,242,238,.6);font-size:.95rem}
+</style>
+{% endblock %}
+{% block content %}
+<div class="analyze-wrap">
+  <h1>Your Weekly Analysis</h1>
+  <p class="sub">Takes about 3 minutes. Everything is private and confidential.</p>
+
+  <form id="analyzeForm" enctype="multipart/form-data">
+
+    <!-- PHOTO -->
+    <div class="form-card">
+      <h2>📸 Photo <span class="optional-tag">Optional</span></h2>
+      <div class="photo-zone" id="photoZone">
+        <input type="file" name="photo" id="photoInput" accept="image/*"/>
+        <div class="photo-icon">🤳</div>
+        <p>Upload a selfie for visual analysis</p>
+        <p style="font-size:.75rem;color:rgba(245,242,238,.25);margin-top:.3rem">Photo is never stored on our servers</p>
+        <div class="name" id="photoName"></div>
+      </div>
+    </div>
+
+    <!-- LIFESTYLE -->
+    <div class="form-card">
+      <h2>😴 Sleep & Recovery</h2>
+      <div class="field">
+        <label>Average hours of sleep per night</label>
+        <div class="range-row">
+          <input type="range" name="sleep" min="3" max="12" value="7" id="sleepRange"/>
+          <span class="range-val" id="sleepVal">7h</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Average daily screen time (hours)</label>
+        <div class="range-row">
+          <input type="range" name="screentime" min="0" max="16" value="5" id="screenRange"/>
+          <span class="range-val" id="screenVal">5h</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>💪 Fitness & Body</h2>
+      <div class="field">
+        <label>How many times do you exercise per week?</label>
+        <select name="sport">
+          <option value="0">Never (0×/week)</option>
+          <option value="1">Rarely (1×/week)</option>
+          <option value="2-3" selected>Sometimes (2-3×/week)</option>
+          <option value="4-5">Often (4-5×/week)</option>
+          <option value="6+">Daily (6+×/week)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Daily water intake</label>
+        <select name="hydration">
+          <option value="less than 1L">Less than 1L (dehydrated)</option>
+          <option value="1-1.5L" selected>1 – 1.5L (okay)</option>
+          <option value="2L+">2L+ (well hydrated)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>🌿 Skincare & Nutrition</h2>
+      <div class="field">
+        <label>Your current skincare routine</label>
+        <select name="skincare">
+          <option value="none">No routine at all</option>
+          <option value="basic" selected>Basic (just washing my face)</option>
+          <option value="moderate">Moderate (cleanser + moisturizer)</option>
+          <option value="advanced">Advanced (cleanser + serum + SPF + more)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>How would you describe your diet?</label>
+        <select name="diet">
+          <option value="mostly junk food">Mostly fast food / junk</option>
+          <option value="mixed, could be better" selected>Mixed — could be better</option>
+          <option value="fairly balanced">Fairly balanced</option>
+          <option value="very clean and intentional">Very clean and intentional</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>✂️ Style & Grooming</h2>
+      <div class="field">
+        <label>How would you describe your current style?</label>
+        <select name="style">
+          <option value="no real style (basics)">No real style — basics only</option>
+          <option value="casual streetwear" selected>Casual streetwear</option>
+          <option value="smart casual">Smart casual</option>
+          <option value="sporty / athletic">Sporty / athletic</option>
+          <option value="fashion-forward">Fashion-forward</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>When did you last get a haircut?</label>
+        <select name="haircut">
+          <option value="more than 3 months ago">More than 3 months ago</option>
+          <option value="1-3 months ago" selected>1–3 months ago</option>
+          <option value="less than 1 month ago">Less than 1 month ago</option>
+          <option value="regularly every 3-4 weeks">Regularly every 3–4 weeks</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>🧠 Mindset & Goals</h2>
+      <div class="field">
+        <label>How confident do you feel overall? (1 = low, 5 = high)</label>
+        <div class="range-row">
+          <input type="range" name="confidence" min="1" max="5" value="3" id="confRange"/>
+          <span class="range-val" id="confVal">3/5</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Your main goal with PeakSelf</label>
+        <select name="goal">
+          <option value="improve my overall appearance">Improve my overall appearance</option>
+          <option value="build confidence and self-esteem" selected>Build confidence & self-esteem</option>
+          <option value="develop a skincare routine">Develop a skincare routine</option>
+          <option value="get in better shape">Get in better shape</option>
+          <option value="improve my style">Improve my style</option>
+          <option value="become the best version of myself (everything)">Become my best self — everything</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-submit" type="submit" id="submitBtn">Generate My Analysis →</button>
+  </form>
+</div>
+
+<!-- Loading overlay -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <p>Your AI coach is analyzing everything…</p>
+</div>
+
+<script>
+// Range inputs
+const ranges = [
+  ['sleepRange','sleepVal', v => v+'h'],
+  ['screenRange','screenVal', v => v+'h'],
+  ['confRange','confVal', v => v+'/5'],
+];
+ranges.forEach(([id, valId, fmt]) => {
+  const el = document.getElementById(id);
+  const val = document.getElementById(valId);
+  el.addEventListener('input', () => val.textContent = fmt(el.value));
+});
+
+// Photo name
+document.getElementById('photoInput').addEventListener('change', function(){
+  const name = this.files[0]?.name || '';
+  document.getElementById('photoName').textContent = name ? '✓ ' + name : '';
+});
+
+// Form submit
+document.getElementById('analyzeForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  document.getElementById('overlay').classList.add('active');
+
+  const fd = new FormData(this);
+  const res = await fetch('/analyze', {method:'POST', body: fd});
+  const data = await res.json();
+
+  if(data.redirect){
+    window.location.href = data.redirect;
+  } else {
+    document.getElementById('overlay').classList.remove('active');
+    btn.disabled = false;
+    alert(data.error || 'Something went wrong. Please try again.');
+  }
+});
+</script>
+{% endblock %}
