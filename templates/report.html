@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Your PeakSelf Report — {{ analysis.score }}/100{% endblock %}
+{% block extra_style %}
+<style>
+.report-wrap{max-width:780px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.report-header{text-align:center;margin-bottom:3rem}
+.report-date{font-size:.8rem;color:rgba(245,242,238,.35);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
+
+/* Score Ring */
+.score-ring-wrap{display:flex;justify-content:center;margin:2rem 0}
+.score-ring{position:relative;width:180px;height:180px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .track{fill:none;stroke:rgba(245,242,238,.07);stroke-width:10}
+.score-ring .fill{fill:none;stroke:var(--gold);stroke-width:10;stroke-linecap:round;transition:stroke-dasharray 1.5s ease;stroke-dasharray:0 440}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;color:var(--gold);line-height:1}
+.score-max{font-size:.75rem;color:rgba(245,242,238,.35);margin-top:.2rem}
+.score-label-tag{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:.5rem}
+.summary-text{color:rgba(245,242,238,.65);font-size:1rem;line-height:1.7;max-width:580px;margin:0 auto}
+
+/* Cards */
+.section-head{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin:2.5rem 0 1.2rem}
+.top3-grid{display:grid;gap:1rem}
+.top3-card{background:rgba(245,242,238,.04);border:1px solid rgba(245,242,238,.08);border-radius:16px;padding:1.5rem;display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start}
+.top3-num{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:rgba(201,169,110,.25);line-height:1}
+.top3-area{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:600;margin-bottom:.3rem;color:var(--white)}
+.top3-insight{font-size:.85rem;color:rgba(245,242,238,.5);margin-bottom:.5rem;line-height:1.5}
+.top3-action{font-size:.85rem;color:var(--gold);display:flex;align-items:flex-start;gap:.4rem;line-height:1.5}
+.top3-action::before{content:'→';flex-shrink:0}
+
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:560px){.tips-grid{grid-template-columns:1fr}}
+.tip-card{background:rgba(245,242,238,.04);border:1px solid rgba(245,242,238,.08);border-radius:14px;padding:1.3rem}
+.tip-icon{font-size:1.5rem;margin-bottom:.6rem}
+.tip-label{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+.tip-text{font-size:.85rem;color:rgba(245,242,238,.6);line-height:1.6}
+
+.plan-card{background:rgba(45,90,61,.1);border:1px solid rgba(45,90,61,.3);border-radius:16px;padding:1.8rem}
+.plan-steps{list-style:none;margin-top:1rem}
+.plan-steps li{padding:.6rem 0;border-bottom:1px solid rgba(245,242,238,.06);font-size:.9rem;color:rgba(245,242,238,.7);display:flex;gap:.8rem;align-items:flex-start;line-height:1.5}
+.plan-steps li:last-child{border-bottom:none}
+.step-badge{background:rgba(201,169,110,.2);color:var(--gold);font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:50px;flex-shrink:0;margin-top:.1rem}
+
+.motivation-card{background:linear-gradient(135deg,rgba(45,90,61,.2),rgba(201,169,110,.08));border:1px solid rgba(201,169,110,.2);border-radius:20px;padding:2.5rem;text-align:center;margin-top:1.5rem}
+.motivation-card p{font-size:1.05rem;color:rgba(245,242,238,.8);line-height:1.75;font-style:italic}
+.motivation-card::before{content:'"';font-family:'Syne',sans-serif;font-size:4rem;color:rgba(201,169,110,.2);display:block;line-height:.5;margin-bottom:1rem}
+
+.cta-bar{text-align:center;margin-top:3rem;padding:2rem;background:rgba(245,242,238,.03);border-radius:16px;border:1px solid rgba(245,242,238,.07)}
+.cta-bar p{color:rgba(245,242,238,.5);font-size:.9rem;margin-bottom:1rem}
+.btn-gold{background:var(--gold);color:var(--black);padding:.75rem 2rem;border-radius:50px;font-weight:600;font-size:.9rem;text-decoration:none;transition:background .2s;display:inline-block}
+.btn-gold:hover{background:var(--gold2)}
+</style>
+{% endblock %}
+{% block content %}
+{% set r = analysis.report %}
+<div class="report-wrap">
+
+  <div class="report-header">
+    <div class="report-date">{{ analysis.created_at.strftime('%B %d, %Y') }} · Your Private Report</div>
+
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg viewBox="0 0 160 160" width="180" height="180">
+          <circle class="track" cx="80" cy="80" r="70"/>
+          <circle class="fill" id="scoreArc" cx="80" cy="80" r="70"/>
+        </svg>
+        <div class="score-center">
+          <div class="score-num">{{ r.score }}</div>
+          <div class="score-max">/ 100</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-label-tag">{{ r.score_label }}</div>
+    <p class="summary-text">{{ r.summary }}</p>
+  </div>
+
+  <!-- TOP 3 -->
+  <div class="section-head">Your Top 3 Priorities</div>
+  <div class="top3-grid">
+    {% for item in r.top3 %}
+    <div class="top3-card">
+      <div class="top3-num">0{{ loop.index }}</div>
+      <div>
+        <div class="top3-area">{{ item.area }}</div>
+        <div class="top3-insight">{{ item.insight }}</div>
+        <div class="top3-action">{{ item.action }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- TIPS -->
+  <div class="section-head">Personalized Tips</div>
+  <div class="tips-grid">
+    <div class="tip-card"><div class="tip-icon">🌿</div><div class="tip-label">Skincare</div><div class="tip-text">{{ r.skincare_tip }}</div></div>
+    <div class="tip-card"><div class="tip-icon">💪</div><div class="tip-label">Fitness</div><div class="tip-text">{{ r.fitness_tip }}</div></div>
+    <div class="tip-card"><div class="tip-icon">✂️</div><div class="tip-label">Style</div><div class="tip-text">{{ r.style_tip }}</div></div>
+    <div class="tip-card"><div class="tip-icon">🧠</div><div class="tip-label">Mindset</div><div class="tip-text">{{ r.mindset_tip }}</div></div>
+  </div>
+
+  <!-- WEEK 1 PLAN -->
+  <div class="section-head">Your Week 1 Action Plan</div>
+  <div class="plan-card">
+    <ul class="plan-steps">
+      {% for step in r.week1_plan %}
+      <li>
+        <span class="step-badge">Step {{ loop.index }}</span>
+        {{ step }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- MOTIVATION -->
+  <div class="motivation-card">
+    <p>{{ r.motivation }}</p>
+  </div>
+
+  <div class="cta-bar">
+    <p>Come back next week to track your progress and get a new action plan.</p>
+    <a class="btn-gold" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+  </div>
+
+</div>
+
+<script>
+// Animate score ring on load
+window.addEventListener('load', () => {
+  const score = {{ r.score }};
+  const circumference = 2 * Math.PI * 70; // ~439.8
+  const filled = (score / 100) * circumference;
+  const arc = document.getElementById('scoreArc');
+  setTimeout(() => {
+    arc.style.strokeDasharray = filled + ' ' + circumference;
+  }, 200);
+});
+</script>
+{% endblock %}
